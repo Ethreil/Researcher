@@ -111,18 +111,93 @@ public class ArcticIce {
 		return true;
 	}
 	
-	public static double getExtentMinimum (String yearDate)
+	public static double getExtentMinimum (String yearDate) throws MalformedURLException, IOException
 	{
+		Scanner scnr;
+		scnr = null;
 		
+		File thisFile = new File(localFileString);
+		try {
+			scnr = new Scanner(thisFile);
+		} catch (FileNotFoundException file0) {
+			file0.printStackTrace();
+			if(isLoaded() == true) { scnr = new Scanner(thisFile); }
+			else { return 0.0; } // Could not parse file
+		}
 		
-		return 0.0;
+		double suspectedValue = 0.0;
+		double actualValue = 0.0;
+		int counter = 0;
+		while (scnr.hasNext()) {
+			
+			if (scnr.next().contains(yearDate)) {
+				scnr.next(); scnr.next();
+				suspectedValue = Double.parseDouble(scnr.next());		
+					
+				if (scnr.next().contains(yearDate)) {
+					actualValue = suspectedValue;
+				} else {
+					scnr.reset();
+					for (int i = 0; i < counter - 1; ++i)
+					{
+						scnr.next();
+					}
+					actualValue = Double.parseDouble(scnr.next());
+				}
+			}
+			
+			
+			++counter;
+		}
+			
+		
+		scnr.close();
+		return actualValue;
 	}
 	
-	public static double getExtentMinimum (int yearDate)
+	public static double getExtentMinimum (int yearDate) throws MalformedURLException, IOException
 	{
+		String yearDateString = Integer.toString(yearDate);
+		Scanner scnr;
+		scnr = null;
 		
+		File thisFile = new File(localFileString);
+		try {
+			scnr = new Scanner(thisFile);
+		} catch (FileNotFoundException file0) {
+			file0.printStackTrace();
+			if(isLoaded() == true) { scnr = new Scanner(thisFile); }
+			else { return 0.0; } // Could not parse file
+		}
 		
-		return 0.0;
+		double suspectedValue = 0.0;
+		double actualValue = 0.0;
+		int counter = 0;
+		while (scnr.hasNext()) {
+			
+			if (scnr.next().contains(yearDateString)) {
+				scnr.next(); scnr.next();
+				suspectedValue = Double.parseDouble(scnr.next());		
+					
+				if (scnr.next().contains(yearDateString)) {
+					actualValue = suspectedValue;
+				} else {
+					scnr.reset();
+					for (int i = 0; i < counter - 1; ++i)
+					{
+						scnr.next();
+					}
+					actualValue = Double.parseDouble(scnr.next());
+				}
+			}
+			
+			
+			++counter;
+		}
+			
+		
+		scnr.close();
+		return actualValue;
 	}
 	
 	public static double getAreaMinimum (String yearDate)

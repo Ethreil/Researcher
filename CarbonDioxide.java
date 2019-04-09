@@ -141,54 +141,13 @@ public class CarbonDioxide
 	Scanner scnr;
 	scnr = null;
 	
-	File f = new File("CO2Data");
+	File thisFile = new File(localFileString);
 	try {
-		scnr = new Scanner(f);
+		scnr = new Scanner(thisFile);
 	} catch (FileNotFoundException file0) {
-		File CO2Data = null;
-		Scanner scanCO2Data = null;
-		try 
-		{
-			CO2Data = new File(localFileString);
-			scanCO2Data = new Scanner(CO2Data);
-		} 
-		catch (FileNotFoundException file1)
-		{
-			 BufferedInputStream in = null;
-			 FileOutputStream fout = null;
-			 try 
-			 {
-				 in = new BufferedInputStream(new URL(fileURL).openStream());
-				 fout = new FileOutputStream(localFileString);
-			 
-			 	 byte data[] = new byte[1024];
-			 	 int count;
-			 while ( (count = in.read(data, 0, 1024) ) != -1) 
-			 {
-				 fout.write(data, 0, count);
-			 }
-			 } 
-			 finally
-			 {
-				 if (in != null) in.close();
-				 if (fout != null) fout.close();
-			 }
-			 
-				try 
-				{
-					CO2Data = new File(localFileString);
-					scanCO2Data = new Scanner(CO2Data);
-				} 
-				catch (FileNotFoundException file2)
-				{
-					file2.printStackTrace();
-					System.out.println("Bad Request. Check connection and data source.");
-					
-				}
-		}
-		
-		scanCO2Data.close();
-
+		file0.printStackTrace();
+		if(isLoaded() == true) { scnr = new Scanner(thisFile); }
+		else { return 0.0; } // Could not parse file
 	}
 	
 	
@@ -218,6 +177,7 @@ public class CarbonDioxide
 	
 	totalCO2 = totalCO2 / (double) arrayCount;
 	
+	scnr.close();
 	return totalCO2;
 	}
  	
@@ -241,52 +201,10 @@ public class CarbonDioxide
 			try {
 				scnr = new Scanner(f);
 			} catch (FileNotFoundException file0) {
-				File CO2Data = null;
-				Scanner scanCO2Data = null;
-				try 
-				{
-					CO2Data = new File(localFileString);
-					scanCO2Data = new Scanner(CO2Data);
-				} 
-				catch (FileNotFoundException file1)
-				{
-					 BufferedInputStream in = null;
-					 FileOutputStream fout = null;
-					 try 
-					 {
-						 in = new BufferedInputStream(new URL(fileURL).openStream());
-						 fout = new FileOutputStream(localFileString);
-					 
-					 	 byte data[] = new byte[1024];
-					 	 int count;
-					 while ( (count = in.read(data, 0, 1024) ) != -1) 
-					 {
-						 fout.write(data, 0, count);
-					 }
-					 } 
-					 finally
-					 {
-						 if (in != null) in.close();
-						 if (fout != null) fout.close();
-					 }
-					 
-						try 
-						{
-							CO2Data = new File(localFileString);
-							scanCO2Data = new Scanner(CO2Data);
-						} 
-						catch (FileNotFoundException file2)
-						{
-							file2.printStackTrace();
-							System.out.println("Bad Request. Check connection and data source.");
-							
-						}
-				}
-				
-				scanCO2Data.close();
-
+				file0.printStackTrace();
+				if(isLoaded() == true) { scnr = new Scanner(f); }
+				else { return 0.0; }
 			}
-			
 			
 			
 			int arrayCount = 0;
@@ -314,6 +232,7 @@ public class CarbonDioxide
 			
 			totalCO2 = totalCO2 / (double) arrayCount;
 			
+			scnr.close();
 			return totalCO2;
 	}
 	
