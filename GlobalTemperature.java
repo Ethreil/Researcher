@@ -13,7 +13,8 @@ public class GlobalTemperature {
 	
 	private static String localFileString = "TemperatureData";
 	private static String fileURL = "https://data.giss.nasa.gov/gistemp/graphs/graph_data/Global_Mean_Estimates_based_on_Land_and_Ocean_Data/graph.txt";
-
+	private static Scanner scanTemp;
+	
 	public static double getAvgRateOfChange (String yearOne, String yearTwo)
 	{
 		
@@ -111,9 +112,23 @@ public class GlobalTemperature {
 		return true;
 	}
 	
-	public static double getAvgLandOceanTemperatureIndex (String yearDate)
+	public static double getAvgLandOceanTemperatureIndex (String yearDate) throws MalformedURLException, FileNotFoundException, IOException
 	{
-		
+		File temperatureFile = new File(localFileString);
+		try {
+			scanTemp = new Scanner(temperatureFile);
+		} catch (FileNotFoundException file0) {
+			file0.printStackTrace();
+			if(isLoaded() == true) { scanTemp = new Scanner(temperatureFile); }
+			else { return -1.0; }
+		}
+		while (scanTemp.hasNextLine())
+		{
+			if (scanTemp.next().equals(yearDate))
+			{
+				return Double.parseDouble(scanTemp.next());
+			}
+		}
 		
 		return 0.0;
 	}
@@ -153,7 +168,55 @@ public class GlobalTemperature {
 		return 0.0;
 	}
 	
-	public static double getLatestFutureLandOceanTemperatureIndex ()
+	public static double getLatestAvgLandOceanTemperatureIndex ()
+	{
+		
+		return 0.0;
+	}
+	
+	public static double getLowessLandOceanTemperatureIndex (String yearDate)
+	{
+		
+		
+		return 0.0;
+	}
+	
+	public static double getLowessLandOceanTemperatureIndex (int yearDate)
+	{
+		
+		
+		return 0.0;
+	}
+	
+	public static double getLowessLandOceanTemperatureIndex (String yearDate, double rateOfChange)
+	{
+		
+		
+		return 0.0;
+	}
+	
+	public static double getLowessLandOceanTemperatureIndex (int yearDate, double rateOfChange)
+	{
+		
+		
+		return 0.0;
+	}
+	
+	public static double getLowessLandOceanTemperatureIndex (String yearDate, String yearOne, String yearTwo)
+	{
+		
+		
+		return 0.0;
+	}
+	
+	public static double getLowessLandOceanTemperatureIndex (int yearDate, int yearOne, int yearTwo)
+	{
+		
+		
+		return 0.0;
+	}
+	
+	public static double getLatestLowessLandOceanTemperatureIndex ()
 	{
 		
 		return 0.0;
