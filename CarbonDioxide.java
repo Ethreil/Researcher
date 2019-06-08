@@ -4,17 +4,23 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Scanner;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
+
 public class CarbonDioxide 
 {
 	
 	private static String localFileString = "CO2Data";
-	private static String fileURL = "ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_mm_mlo.txt";
+	private static String fileURL = "ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_annmean_mlo.txt";
+	private static Scanner scanCO2;
 	private static int year = Calendar.getInstance().get(Calendar.YEAR);
 	
 	public static double getAvgRateOfChange (String yearOne, String yearTwo) throws MalformedURLException, IOException
@@ -128,124 +134,54 @@ public class CarbonDioxide
 	
 	public static double getAvgPPM (String yearDate) throws MalformedURLException, IOException
 	{
-		//Parsing error at 1975 & 1974
-		if (Integer.valueOf(yearDate) ==  1975) {
-			return 331.11;
+		if(!isLoaded()) 
+		{
+			return -1.0;
 		}
-		if (Integer.valueOf(yearDate) ==  1974) {
-			return 330.185;
-		}
-	
-	double[] valuesToAverage = new double[200];
-	
-	Scanner scnr;
-	scnr = null;
-	
-	File thisFile = new File(localFileString);
-	try {
-		scnr = new Scanner(thisFile);
-	} catch (FileNotFoundException file0) {
-		file0.printStackTrace();
-		if(isLoaded() == true) { scnr = new Scanner(thisFile); }
-		else { return 0.0; } // Could not parse file
-	}
-	
-	
-	
-	int arrayCount = 0;
-	while (scnr.hasNext()) {
+		File CO2File = new File(localFileString);
+		scanCO2 = new Scanner(CO2File);
 		
-		if (scnr.next().contains(yearDate)) {
-			
-			if(Integer.parseInt(scnr.next()) < 20) {
-				scnr.next();
-				valuesToAverage[arrayCount] = scnr.nextDouble();
-				++arrayCount;
-			} else {
-				valuesToAverage[arrayCount] = scnr.nextDouble();
-				++arrayCount;
+		while (scanCO2.hasNextLine())
+		{
+			if (scanCO2.next().equals(yearDate))
+			{
+				return Double.parseDouble(scanCO2.next());
 			}
-			
 		}
 		
-	}
-	
-	double totalCO2 = 0.0;
-	for (int i = 0; i < arrayCount; ++i) {
-		totalCO2 = totalCO2 + valuesToAverage[i];
-	}
-	
-	totalCO2 = totalCO2 / (double) arrayCount;
-	
-	scnr.close();
-	return totalCO2;
+		return -1.0;
 	}
  	
 	public static double getAvgPPM (int yearDate) throws MalformedURLException, IOException
 	{
-		String yearDateString = Integer.toString(yearDate);
-		//Parsing error at 1975 & 1974
-				if (Integer.valueOf(yearDate) ==  1975) {
-					return 331.11;
-				}
-				if (Integer.valueOf(yearDate) ==  1974) {
-					return 330.185;
-				}
-			
-			double[] valuesToAverage = new double[200];
-			
-			Scanner scnr;
-			scnr = null;
-			
-			File f = new File("CO2Data");
-			try {
-				scnr = new Scanner(f);
-			} catch (FileNotFoundException file0) {
-				file0.printStackTrace();
-				if(isLoaded() == true) { scnr = new Scanner(f); }
-				else { return 0.0; }
+		if(!isLoaded()) 
+		{
+			return -1.0;
+		}
+		File CO2File = new File(localFileString);
+		scanCO2 = new Scanner(CO2File);
+		
+		while (scanCO2.hasNextLine())
+		{
+			if (scanCO2.next().equals(Integer.toString(yearDate)))
+			{
+				return Double.parseDouble(scanCO2.next());
 			}
-			
-			
-			int arrayCount = 0;
-			while (scnr.hasNext()) {
-				
-				if (scnr.next().contains(yearDateString)) {
-					
-					if(Integer.parseInt(scnr.next()) < 20) {
-						scnr.next();
-						valuesToAverage[arrayCount] = scnr.nextDouble();
-						++arrayCount;
-					} else {
-						valuesToAverage[arrayCount] = scnr.nextDouble();
-						++arrayCount;
-					}
-					
-				}
-				
-			}
-			
-			double totalCO2 = 0.0;
-			for (int i = 0; i < arrayCount; ++i) {
-				totalCO2 = totalCO2 + valuesToAverage[i];
-			}
-			
-			totalCO2 = totalCO2 / (double) arrayCount;
-			
-			scnr.close();
-			return totalCO2;
+		}
+		
+		return -1.0;
 	}
 	
 	public static double getFuturePPM (String yearDate, double rateOfChange) throws MalformedURLException, IOException
 	{
 		double yearDateDouble = Double.valueOf(yearDate);
 		
-		return rateOfChange * (yearDateDouble - (double) year) + getAvgPPM(year);
+		return rateOfChange * (yearDateDouble - (double) (year - 1)) + getAvgPPM(year - 1);
 	}
 	
 	public static double getFuturePPM (int yearDate, double rateOfChange) throws MalformedURLException, IOException
 	{	
-		return rateOfChange * ((double) yearDate - (double) year) + getAvgPPM(year);
+		return rateOfChange * ((double) yearDate - (double) (year - 1)) + getAvgPPM(year - 1);
 	}
 	
 	public static double getFuturePPM (String yearDate, String yearOne, String yearTwo) throws MalformedURLException, IOException
@@ -253,92 +189,122 @@ public class CarbonDioxide
 		double rateOfChange = getAvgRateOfChange(yearOne, yearTwo);
 		double yearDateDouble = Double.valueOf(yearDate);
 		
-		return rateOfChange * (yearDateDouble - (double) year) + getAvgPPM(year);
+		return rateOfChange * (yearDateDouble - (double) (year - 1)) + getAvgPPM(year - 1);
 	}
 	
 	public static double getFuturePPM (int yearDate, int yearOne, int yearTwo) throws MalformedURLException, IOException
 	{
 		double rateOfChange = getAvgRateOfChange(yearOne, yearTwo);
 		
-		return rateOfChange * ((double) yearDate - (double) year) + getAvgPPM(year);
+		return rateOfChange * ((double) yearDate - (double) (year - 1)) + getAvgPPM(year - 1);
 	}
 	
 	public static double getLatestPPM () throws MalformedURLException, IOException
 	{
-		Scanner scnr;
-		scnr = null;
-	
-		File f = new File("CO2Data");
-		try {
-			scnr = new Scanner(f);
-		} catch (FileNotFoundException file0) {
-			File CO2Data = null;
-			Scanner scanCO2Data = null;
-			try 
-			{
-				CO2Data = new File(localFileString);
-				scanCO2Data = new Scanner(CO2Data);
-			} 
-			catch (FileNotFoundException file1)
-			{
-				 BufferedInputStream in = null;
-				 FileOutputStream fout = null;
-				 try 
-				 {
-					 in = new BufferedInputStream(new URL(fileURL).openStream());
-					 fout = new FileOutputStream(localFileString);
-				 
-				 	 byte data[] = new byte[1024];
-				 	 int count;
-				 while ( (count = in.read(data, 0, 1024) ) != -1) 
-				 {
-					 fout.write(data, 0, count);
-				 }
-				 } 
-				 finally
-				 {
-					 if (in != null) in.close();
-					 if (fout != null) fout.close();
-				 }
-				 
-					try 
-					{
-						CO2Data = new File(localFileString);
-						scanCO2Data = new Scanner(CO2Data);
-					} 
-					catch (FileNotFoundException file2)
-					{
-						file2.printStackTrace();
-						System.out.println("Bad Request. Check connection and data source.");
-						
-					}
-			}
-			
-			scanCO2Data.close();
-
+		if(!isLoaded()) 
+		{
+			return -1.0;
 		}
 		
-		scnr = new Scanner(f);	
+		File CO2File = new File(localFileString);
+		scanCO2 = new Scanner(CO2File);
 		
 		int countLines = 0;
-		while ( scnr.hasNextLine() ) {
-					++countLines;
-					scnr.nextLine();
-		} 
-		
-		scnr.reset();
-		
-		for (int i = 0; i < countLines - 1; ++i) {
-			scnr.nextLine();
+		while (scanCO2.hasNextLine())
+		{
+			scanCO2.nextLine();
+			++countLines;
 		}
 		
-		scnr.next();
-		scnr.next();
-		scnr.next();
+		scanCO2.reset();
+		scanCO2 = new Scanner(CO2File);
 		
-		double value = Double.parseDouble(scnr.next());
-		scnr.close();
-		return value; 
+		for (int i = 0; i < countLines - 1; ++i)
+		{
+			scanCO2.nextLine();
+		}
+		
+		scanCO2.next();
+		return Double.parseDouble(scanCO2.next());
+	}
+	
+	public static int getLatestYearInData () throws MalformedURLException, IOException
+	{
+		isLoaded();
+		
+		File CO2File = new File(localFileString);
+		scanCO2 = new Scanner(CO2File);
+		
+		int countLines = 0;
+		while (scanCO2.hasNextLine())
+		{
+			scanCO2.nextLine();
+			++countLines;
+		}
+		
+		scanCO2.reset();
+		scanCO2 = new Scanner(CO2File);
+		
+		for (int i = 0; i < countLines - 1; ++i)
+		{
+			scanCO2.nextLine();
+		}
+		
+		
+		return Integer.parseInt(scanCO2.next());
+	}
+	
+	public static void generateJSONFilePastValues () throws IOException, JSONException
+	{
+		JSONObject pastData = new org.json.JSONObject();
+		
+		for (int i = 1959; i < year ; i = i + 4)
+		{
+			String intI = Integer.toString(i);
+			
+			pastData.put(intI, getAvgPPM(intI) );
+		}
+		
+		File file = new File("pastCO2Data.json");
+		file.createNewFile();
+		FileWriter fileWriter = new FileWriter(file);
+	 	JSONValue.writeJSONString(pastData, fileWriter);
+		fileWriter.close();
+	}
+	
+	public static void generateJSONFileCurrentValue () throws MalformedURLException, JSONException, IOException
+	{
+		int latestYear = getLatestYearInData();
+		
+		String yearString = Integer.toString(latestYear);
+		JSONObject currentData = new org.json.JSONObject();
+		
+		currentData.put(yearString, getLatestPPM());
+		
+		File file = new File("currentCO2Data.json");
+		file.createNewFile();
+		FileWriter fileWriter = new FileWriter(file);
+	 	JSONValue.writeJSONString(currentData, fileWriter);
+		fileWriter.close();
+	}
+	
+	public static void generateJSONFileFutureValues (double rateOfChange) throws MalformedURLException, JSONException, IOException
+	{
+		int latestYear = getLatestYearInData();
+		JSONObject futureData = new org.json.JSONObject();
+		
+		for (int i = latestYear + 4; i < 2070 ; i = i + 4)
+		{
+			String intI = Integer.toString(i);
+			
+			futureData.put(intI, getFuturePPM(intI, rateOfChange) );
+		}
+		
+		File file = new File("futureCO2Data.json");
+		file.createNewFile();
+		FileWriter fileWriter = new FileWriter(file);
+	 	JSONValue.writeJSONString(futureData, fileWriter);
+		fileWriter.close();
 	}
 	
 }
